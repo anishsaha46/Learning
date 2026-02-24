@@ -1,7 +1,20 @@
-from typing import AsyncGenerator
-from app.db.session import AsyncSessionLocal
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt,JWTError
+from fastapi import Depends, HTTPException,status
+from app.core.config import settings
 
-async def get_db()->AsyncGenerator[AsyncSession,None]:
-    async with AsyncSessionLocal() as session:
-        yield session
+oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+async def get_current_user(token:str=Depends(oauth2_scheme)):
+    try:
+        paylaod=jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        return paylaod
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
