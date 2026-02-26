@@ -1,6 +1,7 @@
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 import uuid
 
 from app.db.base import Base
@@ -36,3 +37,7 @@ class User(Base):
         String(50),
         default="student"  # student | instructor | admin
     )
+
+    course=relationship("Course",back_populates="instructor",cascade="all,delete-orphan")
+
+    enrollments=relationship("Enrollment",back_populates="user",cascade="all,delete-orphan")
