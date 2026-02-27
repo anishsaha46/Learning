@@ -16,13 +16,24 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 def create_access_token(data: dict) -> str:
-    to_encode = data.copy()
-    
-    # Add expiration claim
     expire = datetime.utcnow() + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    to_encode.update({"exp": expire})
+    to_encode = data.copy()
+    to_encode.update({"exp": expire, "type": "access"})
+
+    return jwt.encode(
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm="HS256"
+    )
+
+def create_refresh_token(data: dict) -> str:
+    expire = datetime.utcnow() + timedelta(
+        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+    to_encode = data.copy()
+    to_encode.update({"exp": expire, "type": "refresh"})
 
     return jwt.encode(
         to_encode,
